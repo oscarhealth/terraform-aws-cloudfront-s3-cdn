@@ -190,6 +190,10 @@ locals {
   ) : format(var.bucket_domain_format, local.bucket)
 }
 
+locals {
+  failover_origin_group_enabled = signum(length(var.failover_origin_group_members)) == 1
+}
+
 resource "aws_cloudfront_distribution" "default" {
   enabled             = var.enabled
   is_ipv6_enabled     = var.ipv6_enabled
@@ -208,6 +212,27 @@ resource "aws_cloudfront_distribution" "default" {
   }
 
   aliases = var.acm_certificate_arn != "" ? var.aliases : []
+
+  dynamic "failover_origin_group_enabled" {
+    for_each = local.failover_origin_group_enabled ? ["true"] : []
+    origin_group {
+      origin_id = local.origin_group_id
+    }
+    failover_criteria {
+      status_codes = local.origin_group_failover_status_codes
+    }
+
+    member {
+      origin_id = "${bucket_name}"
+    }
+
+    dynamic "failover_origin_group_members" {
+      for_each = var.failover_origin_group_members
+      member {
+        origin_id = failover_origin_group_members.value
+      }
+    }
+  }
 
   origin {
     domain_name = local.bucket_domain_name

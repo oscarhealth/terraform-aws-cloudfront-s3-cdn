@@ -415,3 +415,9 @@ variable "website_enabled" {
   default     = false
   description = "Set to true to use an S3 static website as origin"
 }
+
+variable "failover_origin_group_members" {
+  type        = list(string)
+  default     = []
+  description = "Additional origins to failover to"
+}
