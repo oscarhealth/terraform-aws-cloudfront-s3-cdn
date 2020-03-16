@@ -213,7 +213,7 @@ resource "aws_cloudfront_distribution" "default" {
 
   aliases = var.acm_certificate_arn != "" ? var.aliases : []
 
-  dynamic "failover_origin_group_enabled" {
+  dynamic "origin_group" {
     for_each = local.failover_origin_group_enabled ? ["true"] : []
     content {
       origin_group {
@@ -223,15 +223,11 @@ resource "aws_cloudfront_distribution" "default" {
         status_codes = local.origin_group_failover_status_codes
       }
 
-      member {
-        origin_id = "${bucket_name}"
-      }
-
-      dynamic "failover_origin_group_members" {
-        for_each = var.failover_origin_group_members
+      dynamic "member" {
+        for_each = concat(["${bucket_name}"], var.failover_origin_group_members)
         content {
           member {
-            origin_id = failover_origin_group_members.value
+            origin_id = members.value
           }
         }
       }
