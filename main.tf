@@ -216,9 +216,8 @@ resource "aws_cloudfront_distribution" "default" {
   dynamic "origin_group" {
     for_each = local.failover_origin_group_enabled ? ["true"] : []
     content {
-      origin_group {
-        origin_id = local.origin_group_id
-      }
+      origin_id = local.origin_group_id
+
       failover_criteria {
         status_codes = local.origin_group_failover_status_codes
       }
@@ -226,9 +225,7 @@ resource "aws_cloudfront_distribution" "default" {
       dynamic "member" {
         for_each = concat(["${local.bucket}"], var.failover_origin_group_members)
         content {
-          member {
-            origin_id = members.value
-          }
+          origin_id = members.value
         }
       }
     }
