@@ -215,21 +215,25 @@ resource "aws_cloudfront_distribution" "default" {
 
   dynamic "failover_origin_group_enabled" {
     for_each = local.failover_origin_group_enabled ? ["true"] : []
-    origin_group {
-      origin_id = local.origin_group_id
-    }
-    failover_criteria {
-      status_codes = local.origin_group_failover_status_codes
-    }
+    content {
+      origin_group {
+        origin_id = local.origin_group_id
+      }
+      failover_criteria {
+        status_codes = local.origin_group_failover_status_codes
+      }
 
-    member {
-      origin_id = "${bucket_name}"
-    }
-
-    dynamic "failover_origin_group_members" {
-      for_each = var.failover_origin_group_members
       member {
-        origin_id = failover_origin_group_members.value
+        origin_id = "${bucket_name}"
+      }
+
+      dynamic "failover_origin_group_members" {
+        for_each = var.failover_origin_group_members
+        content {
+          member {
+            origin_id = failover_origin_group_members.value
+          }
+        }
       }
     }
   }
