@@ -224,7 +224,7 @@ resource "aws_cloudfront_distribution" "default" {
       }
 
       dynamic "member" {
-        for_each = concat(["${bucket_name}"], var.failover_origin_group_members)
+        for_each = concat(["${local.bucket}"], var.failover_origin_group_members)
         content {
           member {
             origin_id = members.value
